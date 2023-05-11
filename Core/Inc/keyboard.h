@@ -3,12 +3,13 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <usbd_hid.h>
 
 //#include "stm32f0xx.h"
 #include "stm32h7xx_hal.h"
 #include "queue.h"
 #include "keymap.h"
-#include "usbd_hid.h"
+
 
 // Maximum number of simultaneously pressed keys
 #define ROLLOVER 6
