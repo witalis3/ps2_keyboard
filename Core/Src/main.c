@@ -27,7 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "keyboard.h"
 #include "queue.h"
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,6 +98,8 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   queue_init(&keyq);
+  const char message[] = "Keyboard started!\r\n";
+  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -105,6 +107,30 @@ int main(void)
   while (1)
   {
 	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
+	#ifdef DEBUG
+	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
+	  	  if (bit == 0)
+	  	  {
+	  		  HAL_GPIO_WritePin(DEBUG1_GPIO_Port, DEBUG1_Pin, GPIO_PIN_RESET);
+	  	  }
+	  	  else
+	  	  {
+	  		  HAL_GPIO_WritePin(DEBUG1_GPIO_Port, DEBUG1_Pin, GPIO_PIN_SET);
+	  	  }
+	  	  //HAL_GPIO_TogglePin(DEBUG1_GPIO_Port, DEBUG1_Pin);
+		  bit = HAL_GPIO_ReadPin(DIN_GPIO_Port, DIN_Pin);
+	  	  if (bit == 0)
+	  	  {
+	  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_RESET);
+	  	  }
+	  	  else
+	  	  {
+	  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_SET);
+	  	  }
+	  	  //HAL_GPIO_TogglePin(GPIOx, GPIO_Pin)
+
+	#endif
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

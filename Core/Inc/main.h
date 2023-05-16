@@ -66,6 +66,10 @@ void Error_Handler(void);
 #define CLK_EXTI_IRQn EXTI9_5_IRQn
 #define DIN_Pin GPIO_PIN_9
 #define DIN_GPIO_Port GPIOD
+#define DEBUG2_Pin GPIO_PIN_6
+#define DEBUG2_GPIO_Port GPIOD
+#define DEBUG1_Pin GPIO_PIN_1
+#define DEBUG1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 
