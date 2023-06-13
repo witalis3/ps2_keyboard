@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "fatfs.h"
 #include "i2c.h"
+#include "sdmmc.h"
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
@@ -57,12 +59,10 @@ uint32_t keyq_timeout = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -72,6 +72,13 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
+
+	FRESULT res; /* FatFs function common result code */
+	uint32_t byteswritten; /* File write/read counts */
+	uint8_t wtext[] = "STM32 FATFS works jako tako"; /* File write buffer */
+	uint8_t rtext[_MAX_SS];/* File read buffer */
+
 
   /* USER CODE END 1 */
 
@@ -96,17 +103,69 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
+  MX_SDMMC1_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   queue_init(&keyq);
   const char message[] = "Keyboard started!\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+  if(f_mount(&SDFatFS, (TCHAR const*)SDPath, 1) != FR_OK)
+  	{
+	  const char message[] = "blad montowania\r\n";
+	  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+  		//Error_Handler();
+  	}
+  	else
+  	{
+  		//if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, rtext, sizeof(rtext)) != FR_OK)
+  		if(false)
+  	    {
+  			 const char message[] = "blad formatowania\r\n";
+  			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+  			//Error_Handler();
+  	    }
+  		else
+  		{
+  			//Open file for writing (Create)
+  			if(f_open(&SDFile, "STM32-2.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+  			{
+  				 const char message[] = "blad utworzenia pliku\r\n";
+  				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+  				//Error_Handler();
+  			}
+  			else
+  			{
+
+  				//Write to the text file
+  				res = f_write(&SDFile, wtext, strlen((char *)wtext), (void *)&byteswritten);
+  				if((byteswritten == 0) || (res != FR_OK))
+  				{
+  					 const char message[] = "blad zapisu\r\n";
+  					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+  					//Error_Handler();
+  				}
+  				else
+  				{
+
+  					f_close(&SDFile);
+  				}
+  			}
+  		}
+  	}
+  	f_mount(&SDFatFS, (TCHAR const*)NULL, 0);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
+	  //handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
 	#ifdef DEBUG
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
 	  	  if (bit == 0)
@@ -127,10 +186,26 @@ int main(void)
 	  	  {
 	  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_SET);
 	  	  }
-	  	  //HAL_GPIO_TogglePin(GPIOx, GPIO_Pin)
-
+	  	  /*
+	  	  HAL_GPIO_TogglePin(PC8_GPIO_Port, PC8_Pin);
+	  	  HAL_GPIO_TogglePin(PC9_GPIO_Port, PC9_Pin);
+	  	  HAL_GPIO_TogglePin(PC10_GPIO_Port, PC10_Pin);
+	  	  HAL_GPIO_TogglePin(PC11_GPIO_Port, PC11_Pin);
+	  	  HAL_GPIO_TogglePin(PC12_GPIO_Port, PC12_Pin);
+	  	  HAL_GPIO_TogglePin(PD2_GPIO_Port, PD2_Pin);
+	  	  HAL_GPIO_TogglePin(PA5_GPIO_Port, PA5_Pin);
+	  	  HAL_GPIO_TogglePin(PA7_GPIO_Port, PA7_Pin);
+	  	  HAL_GPIO_TogglePin(PC5_GPIO_Port, PC5_Pin);
+	  	  HAL_GPIO_TogglePin(PB1_GPIO_Port, PB1_Pin);
+	  	  HAL_GPIO_TogglePin(PE7_GPIO_Port, PE7_Pin);
+	  	  HAL_GPIO_TogglePin(PE9_GPIO_Port, PE9_Pin);
+	  	  HAL_GPIO_TogglePin(PE11_GPIO_Port, PE11_Pin);
+	  	  HAL_GPIO_TogglePin(PE13_GPIO_Port, PE13_Pin);
+	  	  */
 	#endif
-
+			 const char message[] = "petla po zapisie\r\n";
+			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+			HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -204,7 +279,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t pin)
     ps2_clk_callback(&keyq, &keyq_timeout, DIN_GPIO_Port, DIN_Pin);
   }
 }
-
 /* USER CODE END 4 */
 
 /**
@@ -218,6 +292,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+
   }
   /* USER CODE END Error_Handler_Debug */
 }
