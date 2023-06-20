@@ -166,7 +166,7 @@ int main(void)
   while (1)
   {
 	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
-	#ifdef DEBUG
+	#ifdef DEBUGi
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
 	  	  if (bit == 0)
 	  	  {
