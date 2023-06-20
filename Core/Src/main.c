@@ -165,7 +165,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
+	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
 	#ifdef DEBUG
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
 	  	  if (bit == 0)
@@ -205,7 +205,7 @@ int main(void)
 	#endif
 			 const char message[] = "petla po zapisie\r\n";
 			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-			HAL_Delay(500);
+			//HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
