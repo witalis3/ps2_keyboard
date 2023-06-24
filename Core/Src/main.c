@@ -30,6 +30,9 @@
 #include "keyboard.h"
 #include "queue.h"
 #include <string.h>
+#include <stdio.h>
+#include "ssd1306.h"
+//#include <ssd1306_tests.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,7 +42,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define SSD1306_USE_I2C
+#define __DEBUG 1
+#define BUFFERSIZE 100
+#define I2CBUF	12
+#define debug_print(x) 	do { if ( __DEBUG ) { strcpy(uartBuffer, x); HAL_UART_Transmit(&huart2, (unsigned char*) uartBuffer, strlen(uartBuffer), HAL_MAX_DELAY); }} while (0)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -53,6 +60,14 @@
 struct queue_t keyq = {0};
 struct keyboard_hid_t khid = {0};
 uint32_t keyq_timeout = 0;
+// dla OLED:
+const uint8_t SSD1306_ADDRESS = 0x3C << 1;
+const uint8_t RANDOM_REG = 0x0F;
+
+char uartBuffer[BUFFERSIZE] = "";
+uint8_t I2CBuffer[I2CBUF] = {0};
+HAL_StatusTypeDef returnValue = 0;
+// koniec OLED
 
 /* USER CODE END PV */
 
@@ -63,6 +78,14 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void init()
+{
+	//ssd1306_TestAll();
+
+}
+
+
+
 /* USER CODE END 0 */
 
 /**
@@ -163,6 +186,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  	//init();
+
+  	// inicjalizacja OLED
+  	ssd1306_Init();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0,26);
+    ssd1306_WriteString("Modulo 3 ele", Font_11x18, White);
+    ssd1306_UpdateScreen();
+
   while (1)
   {
 	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
@@ -204,7 +236,7 @@ int main(void)
 	  	  */
 	#endif
 			 const char message[] = "petla po zapisie\r\n";
-			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+			  //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
 			//HAL_Delay(500);
     /* USER CODE END WHILE */
 
