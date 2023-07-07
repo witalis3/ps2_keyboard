@@ -14,6 +14,11 @@
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
+  *
+  * działa SD, OLED, klawiatura, keypad
+  * ToDo
+  * 	keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
+  * 	debouncingiem i timeoutem w obsłudze KeyPada
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -32,6 +37,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "ssd1306.h"
+#include "KeyPad.h"
 //#include <ssd1306_tests.h>
 /* USER CODE END Includes */
 
@@ -85,7 +91,6 @@ void init()
 }
 
 
-
 /* USER CODE END 0 */
 
 /**
@@ -100,8 +105,9 @@ int main(void)
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten; /* File write/read counts */
 	uint8_t wtext[] = "STM32 FATFS works jako tako"; /* File write buffer */
-	uint8_t rtext[_MAX_SS];/* File read buffer */
+	//uint8_t rtext[_MAX_SS];/* File read buffer */
 
+	KeyPad_Init();
 
   /* USER CODE END 1 */
 
@@ -235,9 +241,36 @@ int main(void)
 	  	  HAL_GPIO_TogglePin(PE13_GPIO_Port, PE13_Pin);
 	  	  */
 	#endif
-			 const char message[] = "petla po zapisie\r\n";
+			 //const char message[] = "petla po zapisie\r\n";
 			  //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
 			//HAL_Delay(500);
+			 uint16_t keypad;
+			 uint32_t timeout = 20;
+			 /*
+			 keypad = KeyPad_WaitForKey(timeout);
+			 if (keypad != 0)
+			 {
+
+					 //const char message[] = "blad zapisu\r\n";
+					 char message[12];
+					 sprintf(message, "%d\r\n", keypad);
+					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+			 }
+			 */
+			 char znak = KeyPad_WaitForKeyGetChar(timeout);
+			 if (znak != 'X')
+			 {
+				  	ssd1306_Init();
+				    ssd1306_Fill(Black);
+				    ssd1306_SetCursor(0,26);
+				    //char c = znak;
+				    char str1[2] = {znak , '\0'};
+					ssd1306_WriteString(str1, Font_11x18, White);
+					ssd1306_UpdateScreen();
+			 }
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
