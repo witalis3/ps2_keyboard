@@ -16,8 +16,14 @@
   ******************************************************************************
   *
   * działa SD, OLED, klawiatura, keypad
+  *
   * ToDo
-  * 	keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
+  * 	- do komitu:
+  * 		- w MX włączona druga karta SD
+  * 	- planowane funkcjonalności
+  * 		-
+  *
+  * 	- keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
   * 	debouncingiem i timeoutem w obsłudze KeyPada
   */
 /* USER CODE END Header */
