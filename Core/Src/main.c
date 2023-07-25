@@ -18,6 +18,7 @@
   * działa SD, OLED, klawiatura, keypad
   *
   * ToDo
+  * 	- custom HID
   * 	- do komitu:
   * 		- w MX włączona druga karta SD
   * 	- planowane funkcjonalności
