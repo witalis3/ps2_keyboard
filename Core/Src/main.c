@@ -17,8 +17,12 @@
   *
   * działa SD, OLED, klawiatura, keypad
   *
+  * do zapamiętania: po generacji z Cube MX zmiania się zawartość pliku usbd_customhid.c
+  * powinno być:
+  * 0x01,                                          bInterfaceSubClass : 1=BOOT, 0=no boot
+  * 0x01,                                              nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse
+  *
   * ToDo
-  * 	- custom HID
   * 	- do komitu:
   * 		- w MX włączona druga karta SD
   * 	- planowane funkcjonalności
@@ -141,6 +145,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
+  MX_SDMMC2_SD_Init();
   /* USER CODE BEGIN 2 */
   queue_init(&keyq);
   const char message[] = "Keyboard started!\r\n";

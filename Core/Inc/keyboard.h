@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <usbd_hid.h>
+#include <usbd_customhid.h>
 
 //#include "stm32f0xx.h"
 #include "stm32h7xx_hal.h"

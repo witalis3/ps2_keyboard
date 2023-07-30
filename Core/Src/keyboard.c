@@ -211,7 +211,8 @@ void handle_keys(
         put_key(khid, usb_keycode);
       }
 
-      USBD_HID_SendReport(usbd, (uint8_t *) khid, KHIDSZ);
+      //USBD_HID_SendReport(usbd, (uint8_t *) khid, KHIDSZ);
+      USBD_CUSTOM_HID_SendReport(usbd, (uint8_t *) khid, KHIDSZ);
 
       if (hi2c != NULL)
       {
