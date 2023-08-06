@@ -40,6 +40,11 @@ void MX_FATFS_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
+extern uint8_t retSD2;    /* Return value for SD */
+extern char SD2Path[4];   /* SD logical drive path */
+extern FATFS SD2FatFS;    /* File system object for SD logical drive */
+extern FIL SD2File;       /* File object for SD */
+
 /* USER CODE END Prototypes */
 #ifdef __cplusplus
 }

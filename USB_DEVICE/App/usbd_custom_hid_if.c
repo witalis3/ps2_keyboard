@@ -216,6 +216,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 		}
 	return 0;
 	*/
+	return 0;
   /* USER CODE END 6 */
 }
 

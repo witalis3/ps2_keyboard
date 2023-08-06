@@ -25,6 +25,11 @@ FIL SDFile;       /* File object for SD */
 
 /* USER CODE BEGIN Variables */
 
+uint8_t retSD2;    /* Return value for SD */
+char SD2Path[4];   /* SD logical drive path */
+FATFS SD2FatFS;    /* File system object for SD logical drive */
+FIL SD2File;       /* File object for SD */
+
 /* USER CODE END Variables */
 
 void MX_FATFS_Init(void)
@@ -34,6 +39,7 @@ void MX_FATFS_Init(void)
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */
+  retSD2 = FATFS_LinkDriver(&SD_Driver, SD2Path);
   /* USER CODE END Init */
 }
 

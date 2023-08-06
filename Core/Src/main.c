@@ -23,11 +23,8 @@
   * 0x01,                                              nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse
   *
   * ToDo
-  * 	- do komitu:
-  * 		- w MX włączona druga karta SD
-  * 	- planowane funkcjonalności
-  * 		-
-  *
+  * 	- obsługa dwóch kart
+  * 	- identyfikacja klawiatury (model/producent) w sytemie na PC
   * 	- keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
   * 	debouncingiem i timeoutem w obsłudze KeyPada
   */
@@ -171,7 +168,7 @@ int main(void)
   		else
   		{
   			//Open file for writing (Create)
-  			if(f_open(&SDFile, "STM32-2.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+  			if(f_open(&SDFile, "0:STM32-2.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
   			{
   				 const char message[] = "blad utworzenia pliku\r\n";
   				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
@@ -200,6 +197,57 @@ int main(void)
   	}
   	f_mount(&SDFatFS, (TCHAR const*)NULL, 0);
 
+  	// druga karta:
+    if(f_mount(&SD2FatFS, (TCHAR const*)SD2Path, 1) != FR_OK)
+    	{
+  	  const char message[] = "blad montowania SD2\r\n";
+  	  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+    		//Error_Handler();
+    	}
+    	else
+    	{
+    		//if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, rtext, sizeof(rtext)) != FR_OK)
+    		if(false)
+    	    {
+    			 const char message[] = "blad formatowania\r\n";
+    			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+    			//Error_Handler();
+    	    }
+    		else
+    		{
+    			//Open file for writing (Create)
+    			if(f_open(&SD2File, "1:STM32-42.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+    			{
+    				 const char message[] = "blad utworzenia pliku\r\n";
+    				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+    				//Error_Handler();
+    			}
+    			else
+    			{
+
+    				//Write to the text file
+    				res = f_write(&SD2File, wtext, strlen((char *)wtext), (void *)&byteswritten);
+    				if((byteswritten == 0) || (res != FR_OK))
+    				{
+    					 const char message[] = "blad zapisu\r\n";
+    					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+
+    					//Error_Handler();
+    				}
+    				else
+    				{
+
+    					f_close(&SD2File);
+    				}
+    			}
+    		}
+    	}
+    	f_mount(&SD2FatFS, (TCHAR const*)NULL, 0);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -216,7 +264,7 @@ int main(void)
   while (1)
   {
 	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
-	#ifdef DEBUGi
+	#ifdef DEBUG
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
 	  	  if (bit == 0)
 	  	  {
@@ -236,22 +284,31 @@ int main(void)
 	  	  {
 	  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_SET);
 	  	  }
-	  	  /*
+
 	  	  HAL_GPIO_TogglePin(PC8_GPIO_Port, PC8_Pin);
 	  	  HAL_GPIO_TogglePin(PC9_GPIO_Port, PC9_Pin);
 	  	  HAL_GPIO_TogglePin(PC10_GPIO_Port, PC10_Pin);
 	  	  HAL_GPIO_TogglePin(PC11_GPIO_Port, PC11_Pin);
 	  	  HAL_GPIO_TogglePin(PC12_GPIO_Port, PC12_Pin);
 	  	  HAL_GPIO_TogglePin(PD2_GPIO_Port, PD2_Pin);
+	  	  /*
 	  	  HAL_GPIO_TogglePin(PA5_GPIO_Port, PA5_Pin);
 	  	  HAL_GPIO_TogglePin(PA7_GPIO_Port, PA7_Pin);
 	  	  HAL_GPIO_TogglePin(PC5_GPIO_Port, PC5_Pin);
 	  	  HAL_GPIO_TogglePin(PB1_GPIO_Port, PB1_Pin);
+	  	  */
 	  	  HAL_GPIO_TogglePin(PE7_GPIO_Port, PE7_Pin);
 	  	  HAL_GPIO_TogglePin(PE9_GPIO_Port, PE9_Pin);
 	  	  HAL_GPIO_TogglePin(PE11_GPIO_Port, PE11_Pin);
 	  	  HAL_GPIO_TogglePin(PE13_GPIO_Port, PE13_Pin);
-	  	  */
+	  	  // SD2:
+	  	  HAL_GPIO_TogglePin(PA0_GPIO_Port, PA0_Pin);
+	  	  HAL_GPIO_TogglePin(PB3_GPIO_Port, PB3_Pin);
+	  	  HAL_GPIO_TogglePin(PB4_GPIO_Port, PB4_Pin);
+	  	  HAL_GPIO_TogglePin(PB14_GPIO_Port, PB14_Pin);
+	  	  HAL_GPIO_TogglePin(PB15_GPIO_Port, PB15_Pin);
+	  	  HAL_GPIO_TogglePin(PC1_GPIO_Port, PC1_Pin);
+
 	#endif
 			 //const char message[] = "petla po zapisie\r\n";
 			  //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
