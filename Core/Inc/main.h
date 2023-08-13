@@ -59,10 +59,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define K1_BUTTON_Pin GPIO_PIN_3
 #define K1_BUTTON_GPIO_Port GPIOE
-#define PC1_Pin GPIO_PIN_1
-#define PC1_GPIO_Port GPIOC
-#define PA0_Pin GPIO_PIN_0
-#define PA0_GPIO_Port GPIOA
 #define PE7_Pin GPIO_PIN_7
 #define PE7_GPIO_Port GPIOE
 #define PE9_Pin GPIO_PIN_9
@@ -71,10 +67,6 @@ void Error_Handler(void);
 #define PE11_GPIO_Port GPIOE
 #define PE13_Pin GPIO_PIN_13
 #define PE13_GPIO_Port GPIOE
-#define PB14_Pin GPIO_PIN_14
-#define PB14_GPIO_Port GPIOB
-#define PB15_Pin GPIO_PIN_15
-#define PB15_GPIO_Port GPIOB
 #define CLK_Pin GPIO_PIN_8
 #define CLK_GPIO_Port GPIOD
 #define CLK_EXTI_IRQn EXTI9_5_IRQn
@@ -94,10 +86,6 @@ void Error_Handler(void);
 #define PD2_GPIO_Port GPIOD
 #define DEBUG2_Pin GPIO_PIN_6
 #define DEBUG2_GPIO_Port GPIOD
-#define PB3_Pin GPIO_PIN_3
-#define PB3_GPIO_Port GPIOB
-#define PB4_Pin GPIO_PIN_4
-#define PB4_GPIO_Port GPIOB
 #define DEBUG1_Pin GPIO_PIN_1
 #define DEBUG1_GPIO_Port GPIOE
 

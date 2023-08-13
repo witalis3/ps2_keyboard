@@ -142,7 +142,6 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
-  MX_SDMMC2_SD_Init();
   /* USER CODE BEGIN 2 */
   queue_init(&keyq);
   const char message[] = "Keyboard started!\r\n";
@@ -198,6 +197,7 @@ int main(void)
   	f_mount(&SDFatFS, (TCHAR const*)NULL, 0);
 
   	// druga karta:
+  	/*
     if(f_mount(&SD2FatFS, (TCHAR const*)SD2Path, 1) != FR_OK)
     	{
   	  const char message[] = "blad montowania SD2\r\n";
@@ -246,7 +246,7 @@ int main(void)
     		}
     	}
     	f_mount(&SD2FatFS, (TCHAR const*)NULL, 0);
-
+*/
 
   /* USER CODE END 2 */
 
@@ -284,19 +284,19 @@ int main(void)
 	  	  {
 	  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_SET);
 	  	  }
-
+	  	  /*
 	  	  HAL_GPIO_TogglePin(PC8_GPIO_Port, PC8_Pin);
 	  	  HAL_GPIO_TogglePin(PC9_GPIO_Port, PC9_Pin);
 	  	  HAL_GPIO_TogglePin(PC10_GPIO_Port, PC10_Pin);
 	  	  HAL_GPIO_TogglePin(PC11_GPIO_Port, PC11_Pin);
 	  	  HAL_GPIO_TogglePin(PC12_GPIO_Port, PC12_Pin);
 	  	  HAL_GPIO_TogglePin(PD2_GPIO_Port, PD2_Pin);
-	  	  /*
+
 	  	  HAL_GPIO_TogglePin(PA5_GPIO_Port, PA5_Pin);
 	  	  HAL_GPIO_TogglePin(PA7_GPIO_Port, PA7_Pin);
 	  	  HAL_GPIO_TogglePin(PC5_GPIO_Port, PC5_Pin);
 	  	  HAL_GPIO_TogglePin(PB1_GPIO_Port, PB1_Pin);
-	  	  */
+
 	  	  HAL_GPIO_TogglePin(PE7_GPIO_Port, PE7_Pin);
 	  	  HAL_GPIO_TogglePin(PE9_GPIO_Port, PE9_Pin);
 	  	  HAL_GPIO_TogglePin(PE11_GPIO_Port, PE11_Pin);
@@ -308,6 +308,7 @@ int main(void)
 	  	  HAL_GPIO_TogglePin(PB14_GPIO_Port, PB14_Pin);
 	  	  HAL_GPIO_TogglePin(PB15_GPIO_Port, PB15_Pin);
 	  	  HAL_GPIO_TogglePin(PC1_GPIO_Port, PC1_Pin);
+	  	  */
 
 	#endif
 			 //const char message[] = "petla po zapisie\r\n";
