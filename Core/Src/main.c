@@ -33,7 +33,7 @@
 #include "main.h"
 #include "fatfs.h"
 #include "i2c.h"
-#include "sdmmc.h"
+#include "spi.h"
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
@@ -46,6 +46,9 @@
 #include <stdio.h>
 #include "ssd1306.h"
 #include "KeyPad.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h> //for va_list var arg functions
 //#include <ssd1306_tests.h>
 /* USER CODE END Includes */
 
@@ -88,16 +91,26 @@ HAL_StatusTypeDef returnValue = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+void myprintf(const char *fmt, ...);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void myprintf(const char *fmt, ...)
+{
+	  static char buffer[256];
+	  va_list args;
+	  va_start(args, fmt);
+	  vsnprintf(buffer, sizeof(buffer), fmt, args);
+	  va_end(args);
+
+	  int len = strlen(buffer);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)buffer, len, HAL_MAX_DELAY);
+}
 void init()
 {
 	//ssd1306_TestAll();
-
 }
-
 
 /* USER CODE END 0 */
 
@@ -140,113 +153,95 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
-  MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   queue_init(&keyq);
-  const char message[] = "Keyboard started!\r\n";
-  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  //const char message[] = "Keyboard started!\r\n";
+  //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  /* USER CODE BEGIN 2 */
+  //const char message[] = "SD card demo by kiwih\r\n";
+  //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  myprintf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
 
-  if(f_mount(&SDFatFS, (TCHAR const*)SDPath, 1) != FR_OK)
-  	{
-	  const char message[] = "blad montowania\r\n";
-	  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  HAL_Delay(1000); //a short delay is important to let the SD card settle
 
-  		//Error_Handler();
-  	}
-  	else
-  	{
-  		//if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, rtext, sizeof(rtext)) != FR_OK)
-  		if(false)
-  	    {
-  			 const char message[] = "blad formatowania\r\n";
-  			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  //some variables for FatFs
+  FATFS FatFs; 	//Fatfs handle
+  FIL fil; 		//File handle
+  FRESULT fres; //Result after operations
 
-  			//Error_Handler();
-  	    }
-  		else
-  		{
-  			//Open file for writing (Create)
-  			if(f_open(&SDFile, "0:STM32-2.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-  			{
-  				 const char message[] = "blad utworzenia pliku\r\n";
-  				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  //Open the file system
+  fres = f_mount(&FatFs, "", 1); //1=mount now
+  if (fres != FR_OK) {
+	myprintf("f_mount error (%i)\r\n", fres);
+	while(1);
+  }
 
-  				//Error_Handler();
-  			}
-  			else
-  			{
+  //Let's get some statistics from the SD card
+  DWORD free_clusters, free_sectors, total_sectors;
 
-  				//Write to the text file
-  				res = f_write(&SDFile, wtext, strlen((char *)wtext), (void *)&byteswritten);
-  				if((byteswritten == 0) || (res != FR_OK))
-  				{
-  					 const char message[] = "blad zapisu\r\n";
-  					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  FATFS* getFreeFs;
 
-  					//Error_Handler();
-  				}
-  				else
-  				{
+  fres = f_getfree("", &free_clusters, &getFreeFs);
+  if (fres != FR_OK) {
+	myprintf("f_getfree error (%i)\r\n", fres);
+	while(1);
+  }
 
-  					f_close(&SDFile);
-  				}
-  			}
-  		}
-  	}
-  	f_mount(&SDFatFS, (TCHAR const*)NULL, 0);
+  //Formula comes from ChaN's documentation
+  total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
+  free_sectors = free_clusters * getFreeFs->csize;
 
-  	// druga karta:
-  	/*
-    if(f_mount(&SD2FatFS, (TCHAR const*)SD2Path, 1) != FR_OK)
-    	{
-  	  const char message[] = "blad montowania SD2\r\n";
-  	  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  myprintf("SD card stats:\r\n%10lu KiB total drive space.\r\n%10lu KiB available.\r\n", total_sectors / 2, free_sectors / 2);
 
-    		//Error_Handler();
-    	}
-    	else
-    	{
-    		//if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, rtext, sizeof(rtext)) != FR_OK)
-    		if(false)
-    	    {
-    			 const char message[] = "blad formatowania\r\n";
-    			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  //Now let's try to open file "test.txt"
+  fres = f_open(&fil, "test.txt", FA_READ);
+  if (fres != FR_OK) {
+	myprintf("f_open error (%i)\r\n");
+	while(1);
+  }
+  myprintf("I was able to open 'test.txt' for reading!\r\n");
 
-    			//Error_Handler();
-    	    }
-    		else
-    		{
-    			//Open file for writing (Create)
-    			if(f_open(&SD2File, "1:STM32-42.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-    			{
-    				 const char message[] = "blad utworzenia pliku\r\n";
-    				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  //Read 30 bytes from "test.txt" on the SD card
+  BYTE readBuf[30];
 
-    				//Error_Handler();
-    			}
-    			else
-    			{
+  //We can either use f_read OR f_gets to get data out of files
+  //f_gets is a wrapper on f_read that does some string formatting for us
+  TCHAR* rres = f_gets((TCHAR*)readBuf, 30, &fil);
+  if(rres != 0) {
+	myprintf("Read string from 'test.txt' contents: %s\r\n", readBuf);
+  } else {
+	myprintf("f_gets error (%i)\r\n", fres);
+  }
 
-    				//Write to the text file
-    				res = f_write(&SD2File, wtext, strlen((char *)wtext), (void *)&byteswritten);
-    				if((byteswritten == 0) || (res != FR_OK))
-    				{
-    					 const char message[] = "blad zapisu\r\n";
-    					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
+  //Be a tidy kiwi - don't forget to close your file!
+  f_close(&fil);
 
-    					//Error_Handler();
-    				}
-    				else
-    				{
+  //Now let's try and write a file "write.txt"
+  fres = f_open(&fil, "write.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+  if(fres == FR_OK) {
+	myprintf("I was able to open 'write.txt' for writing\r\n");
+  } else {
+	myprintf("f_open error (%i)\r\n", fres);
+  }
 
-    					f_close(&SD2File);
-    				}
-    			}
-    		}
-    	}
-    	f_mount(&SD2FatFS, (TCHAR const*)NULL, 0);
-*/
+  //Copy in a string
+  strncpy((char*)readBuf, "a new file is made!", 19);
+  UINT bytesWrote;
+  fres = f_write(&fil, readBuf, 19, &bytesWrote);
+  if(fres == FR_OK) {
+	myprintf("Wrote %i bytes to 'write.txt'!\r\n", bytesWrote);
+  } else {
+	myprintf("f_write error (%i)\r\n");
+  }
+
+  //Be a tidy kiwi - don't forget to close your file!
+  f_close(&fil);
+
+  //We're done, so de-mount the drive
+  f_mount(NULL, "", 0);
+
 
   /* USER CODE END 2 */
 
@@ -264,7 +259,7 @@ int main(void)
   while (1)
   {
 	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
-	#ifdef DEBUG
+	#ifdef DEBUGi
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
 	  	  if (bit == 0)
 	  	  {

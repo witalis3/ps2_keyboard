@@ -59,6 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define K1_BUTTON_Pin GPIO_PIN_3
 #define K1_BUTTON_GPIO_Port GPIOE
+#define SD_CS_Pin GPIO_PIN_4
+#define SD_CS_GPIO_Port GPIOC
 #define PE7_Pin GPIO_PIN_7
 #define PE7_GPIO_Port GPIOE
 #define PE9_Pin GPIO_PIN_9
@@ -72,25 +74,13 @@ void Error_Handler(void);
 #define CLK_EXTI_IRQn EXTI9_5_IRQn
 #define DIN_Pin GPIO_PIN_9
 #define DIN_GPIO_Port GPIOD
-#define PC8_Pin GPIO_PIN_8
-#define PC8_GPIO_Port GPIOC
-#define PC9_Pin GPIO_PIN_9
-#define PC9_GPIO_Port GPIOC
-#define PC10_Pin GPIO_PIN_10
-#define PC10_GPIO_Port GPIOC
-#define PC11_Pin GPIO_PIN_11
-#define PC11_GPIO_Port GPIOC
-#define PC12_Pin GPIO_PIN_12
-#define PC12_GPIO_Port GPIOC
-#define PD2_Pin GPIO_PIN_2
-#define PD2_GPIO_Port GPIOD
 #define DEBUG2_Pin GPIO_PIN_6
 #define DEBUG2_GPIO_Port GPIOD
 #define DEBUG1_Pin GPIO_PIN_1
 #define DEBUG1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-
+#define SD_SPI_HANDLE hspi1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
