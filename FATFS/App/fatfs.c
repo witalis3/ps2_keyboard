@@ -25,11 +25,6 @@ FIL USERFile;       /* File object for USER */
 
 /* USER CODE BEGIN Variables */
 
-uint8_t retSD2;    /* Return value for SD */
-char SD2Path[4];   /* SD logical drive path */
-FATFS SD2FatFS;    /* File system object for SD logical drive */
-FIL SD2File;       /* File object for SD */
-
 /* USER CODE END Variables */
 
 void MX_FATFS_Init(void)

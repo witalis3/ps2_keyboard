@@ -23,6 +23,7 @@
   * 0x01,                                              nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse
   *
   * ToDo
+  * 	- lekcja 1
   * 	- obsługa dwóch kart
   * 	- identyfikacja klawiatury (model/producent) w sytemie na PC
   * 	- keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
@@ -34,12 +35,16 @@
 #include "fatfs.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+// SD SPI
+#include "sd.h"
+
 #include "keyboard.h"
 #include "queue.h"
 #include <string.h>
@@ -64,6 +69,8 @@
 #define BUFFERSIZE 100
 #define I2CBUF	12
 #define debug_print(x) 	do { if ( __DEBUG ) { strcpy(uartBuffer, x); HAL_UART_Transmit(&huart2, (unsigned char*) uartBuffer, strlen(uartBuffer), HAL_MAX_DELAY); }} while (0)
+FATFS fs;
+FIL fil;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -74,6 +81,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+// SD SPI
+volatile uint16_t Timer1=0;
+
 struct queue_t keyq = {0};
 struct keyboard_hid_t khid = {0};
 uint32_t keyq_timeout = 0;
@@ -155,7 +165,12 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_FATFS_Init();
   MX_SPI1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  // SD SPI:
+  HAL_TIM_Base_Start_IT(&htim2);
+
+
   queue_init(&keyq);
   //const char message[] = "Keyboard started!\r\n";
   //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
@@ -163,8 +178,23 @@ int main(void)
   //const char message[] = "SD card demo by kiwih\r\n";
   //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
   myprintf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
+  // SD SPI
+      HAL_TIM_Base_Start_IT(&htim2);
 
-  HAL_Delay(1000); //a short delay is important to let the SD card settle
+      SD_PowerOn();
+
+      sd_ini();
+
+
+  //HAL_Delay(1000); //a short delay is important to let the SD card settle
+
+  HAL_Delay(500);
+  f_mount(&fs, "", 0);
+  f_open(&fil, "write.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+  //f_lseek(&fil, fil.fsize);
+  f_puts("Hello from Nizar\n", &fil);
+  f_close(&fil);
+
 
   //some variables for FatFs
   FATFS FatFs; 	//Fatfs handle
@@ -255,6 +285,7 @@ int main(void)
     ssd1306_SetCursor(0,26);
     ssd1306_WriteString("Modulo 3 ele", Font_11x18, White);
     ssd1306_UpdateScreen();
+
 
   while (1)
   {
@@ -402,6 +433,25 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+// SD SPI
+//----------------------------------------------------------
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+
+{
+
+if(htim==&htim2)
+
+{
+
+Timer1++;
+
+}
+
+}
+
+//----------------------------------------------------------
+
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
   if (pin == CLK_Pin)
