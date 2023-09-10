@@ -15,14 +15,13 @@
   *
   ******************************************************************************
   *
-  * działa SD, OLED, klawiatura, keypad
+  * OLED, klawiatura, keypad
   *
-  * do zapamiętania: po generacji z Cube MX zmiania się zawartość pliku usbd_customhid.c
-  * powinno być:
-  * 0x01,                                          bInterfaceSubClass : 1=BOOT, 0=no boot
-  * 0x01,                                              nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse
   *
   * ToDo
+  * 	- obsługa SD na magistarli SPI wg urok1,2,3
+  * 		- obejrzeć przebiegi
+  *
   * 	- obsługa dwóch kart
   * 	- identyfikacja klawiatury (model/producent) w sytemie na PC
   * 	- keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
@@ -33,13 +32,16 @@
 #include "main.h"
 #include "fatfs.h"
 #include "i2c.h"
-#include "sdmmc.h"
+#include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "sd.h"
+
 #include "keyboard.h"
 #include "queue.h"
 #include <string.h>
@@ -71,6 +73,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+volatile uint16_t Timer1=0;
+
 struct queue_t keyq = {0};
 struct keyboard_hid_t khid = {0};
 uint32_t keyq_timeout = 0;
@@ -140,113 +144,17 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
-  MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
+  MX_SPI1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim2);
+  SD_PowerOn();
+  sd_ini();
+
   queue_init(&keyq);
   const char message[] = "Keyboard started!\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-  if(f_mount(&SDFatFS, (TCHAR const*)SDPath, 1) != FR_OK)
-  	{
-	  const char message[] = "blad montowania\r\n";
-	  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-  		//Error_Handler();
-  	}
-  	else
-  	{
-  		//if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, rtext, sizeof(rtext)) != FR_OK)
-  		if(false)
-  	    {
-  			 const char message[] = "blad formatowania\r\n";
-  			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-  			//Error_Handler();
-  	    }
-  		else
-  		{
-  			//Open file for writing (Create)
-  			if(f_open(&SDFile, "0:STM32-2.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-  			{
-  				 const char message[] = "blad utworzenia pliku\r\n";
-  				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-  				//Error_Handler();
-  			}
-  			else
-  			{
-
-  				//Write to the text file
-  				res = f_write(&SDFile, wtext, strlen((char *)wtext), (void *)&byteswritten);
-  				if((byteswritten == 0) || (res != FR_OK))
-  				{
-  					 const char message[] = "blad zapisu\r\n";
-  					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-  					//Error_Handler();
-  				}
-  				else
-  				{
-
-  					f_close(&SDFile);
-  				}
-  			}
-  		}
-  	}
-  	f_mount(&SDFatFS, (TCHAR const*)NULL, 0);
-
-  	// druga karta:
-  	/*
-    if(f_mount(&SD2FatFS, (TCHAR const*)SD2Path, 1) != FR_OK)
-    	{
-  	  const char message[] = "blad montowania SD2\r\n";
-  	  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-    		//Error_Handler();
-    	}
-    	else
-    	{
-    		//if(f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, rtext, sizeof(rtext)) != FR_OK)
-    		if(false)
-    	    {
-    			 const char message[] = "blad formatowania\r\n";
-    			  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-    			//Error_Handler();
-    	    }
-    		else
-    		{
-    			//Open file for writing (Create)
-    			if(f_open(&SD2File, "1:STM32-42.TXT", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-    			{
-    				 const char message[] = "blad utworzenia pliku\r\n";
-    				  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-    				//Error_Handler();
-    			}
-    			else
-    			{
-
-    				//Write to the text file
-    				res = f_write(&SD2File, wtext, strlen((char *)wtext), (void *)&byteswritten);
-    				if((byteswritten == 0) || (res != FR_OK))
-    				{
-    					 const char message[] = "blad zapisu\r\n";
-    					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-
-    					//Error_Handler();
-    				}
-    				else
-    				{
-
-    					f_close(&SD2File);
-    				}
-    			}
-    		}
-    	}
-    	f_mount(&SD2FatFS, (TCHAR const*)NULL, 0);
-*/
 
   /* USER CODE END 2 */
 
@@ -375,12 +283,12 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 2;
-  RCC_OscInitStruct.PLL.PLLN = 12;
-  RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 3;
+  RCC_OscInitStruct.PLL.PLLN = 32;
+  RCC_OscInitStruct.PLL.PLLP = 10;
+  RCC_OscInitStruct.PLL.PLLQ = 8;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -400,13 +308,25 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
 }
 
 /* USER CODE BEGIN 4 */
+//----------------------------------------------------------
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim==&htim2)
+	{
+		Timer1++;
+	}
+}
+
+//----------------------------------------------------------
+
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
   if (pin == CLK_Pin)
