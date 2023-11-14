@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define CS_SD_GPIO_PORT GPIOA
 #define CS_SD_PIN GPIO_PIN_0
@@ -36,4 +37,8 @@ typedef struct sd_info {
 } sd_info_ptr;
 //--------------------------------------------------
 void SPI_Release(void);
+void SD_PowerOn(void);
+uint8_t sd_ini(void);
+void SPI_SendByte(uint8_t bt);
+uint8_t SPI_ReceiveByte(void);
 #endif /* INC_SD_H_ */

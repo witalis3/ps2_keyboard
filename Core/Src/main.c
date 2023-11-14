@@ -16,9 +16,12 @@
   ******************************************************************************
   *
   * OLED, klawiatura, keypad
+  * SD na SPI
   *
   *
-  * ToDo
+  * ToDo główne
+  * 	- pamiętać:
+  * 		- u nas jest hspi1 (hsp jeden) i huart2
   * 	- obsługa SD na magistarli SPI wg urok1,2,3
   * 		- obejrzeć przebiegi
   *
@@ -148,6 +151,8 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  //HAL_Delay(1000);
+
   HAL_TIM_Base_Start_IT(&htim2);
   SD_PowerOn();
   sd_ini();
@@ -160,8 +165,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  	//init();
-
   	// inicjalizacja OLED
   	ssd1306_Init();
     ssd1306_Fill(Black);
@@ -171,6 +174,8 @@ int main(void)
 
   while (1)
   {
+	  // ToDo opóźnienie i ini później do usunięcia
+	  HAL_Delay(100);
 	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
 	#ifdef DEBUG
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
@@ -217,6 +222,8 @@ int main(void)
 	  	  HAL_GPIO_TogglePin(PB15_GPIO_Port, PB15_Pin);
 	  	  HAL_GPIO_TogglePin(PC1_GPIO_Port, PC1_Pin);
 	  	  */
+	  	  //HAL_GPIO_TogglePin(SD_CS_GPIO_Port, SD_CS_Pin);
+	  	  //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
 	#endif
 			 //const char message[] = "petla po zapisie\r\n";
