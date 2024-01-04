@@ -86,6 +86,11 @@ uint8_t sd_ini(void) {
 	hspi1.Init.BaudRatePrescaler = temp;
 	HAL_SPI_Init(&hspi1);
 	SS_SD_SELECT();
+
+	SPI_SendByte(0x35);
+	SPI_SendByte(0x35);
+	SPI_SendByte(0x35);
+
 	if (SD_cmd(CMD0, 0) == 1) // Enter Idle state
 		{
 		SPI_Release();
@@ -128,9 +133,11 @@ uint8_t sd_ini(void) {
 	} else {
 		//sprintf(str1, "Brak odpowiedzi z karty\r\n");
 		//HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
+		return 1;
 		zwrot = 1;
 	}
 	// ToDo do usunięcia:
+
 	if (zwrot == 0)
 	{
 	 SS_SD_DESELECT();
@@ -141,6 +148,7 @@ uint8_t sd_ini(void) {
 	{
 		sprintf(str1, "brak odpowiedzi z karty po probie inicjalizacji\r\n");
 	}
+
 	HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
 	return zwrot;
 }
