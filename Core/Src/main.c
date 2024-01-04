@@ -16,14 +16,19 @@
   ******************************************************************************
   *
   * OLED, klawiatura, keypad
-  * SD na SPI
+  * SD na SPI3
+  * CS PA0 biały (przy module)
+  * MOSI PB2 niebieski
+  * MISO PC11 czarny
+  * SCK PC10 żółty
+  *
   *
   *
   * ToDo główne
   * 	- pamiętać:
-  * 		- u nas jest hspi1 (hsp jeden) i huart2
+  * 		- u nas jest hspi3 (hsp trzy) i huart2
   * 	- obsługa SD na magistarli SPI wg urok1,2,3
-  * 		- obejrzeć przebiegi
+  * 		- obejrzeć przebiegi???
   *
   * 	- obsługa dwóch kart
   * 	- identyfikacja klawiatury (model/producent) w sytemie na PC
