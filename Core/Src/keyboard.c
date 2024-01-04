@@ -1,5 +1,5 @@
 #include "keyboard.h"
-#include "usart.h"
+//#include "usart.h"
 
 // Puts a keycode into a HID report if there's an empty slot available
 void put_key(struct keyboard_hid_t *khid, uint8_t keycode)
@@ -118,11 +118,11 @@ void ps2_clk_callback(
 #ifdef DEBUG
   	  if (bit == 0)
   	  {
-  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_RESET);
+  		  //HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_RESET);
   	  }
   	  else
   	  {
-  		  HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_SET);
+  		  //HAL_GPIO_WritePin(DEBUG2_GPIO_Port, DEBUG2_Pin, GPIO_PIN_SET);
   	  }
 #endif
 
@@ -160,7 +160,7 @@ void ps2_clk_callback(
 }
 
 void handle_keys(
-  USBD_HandleTypeDef *usbd,
+  //USBD_HandleTypeDef *usbd,
   struct keyboard_hid_t *khid,
   struct queue_t *keyq,
   uint32_t keyq_timeout,
@@ -212,7 +212,7 @@ void handle_keys(
       }
 
       //USBD_HID_SendReport(usbd, (uint8_t *) khid, KHIDSZ);
-      USBD_CUSTOM_HID_SendReport(usbd, (uint8_t *) khid, KHIDSZ);
+      //USBD_CUSTOM_HID_SendReport(usbd, (uint8_t *) khid, KHIDSZ);
 
       if (hi2c != NULL)
       {

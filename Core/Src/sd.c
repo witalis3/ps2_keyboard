@@ -7,6 +7,7 @@
 
 #include "sd.h"
 extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi3;
 
 //-----------------------------------------------
 
@@ -28,13 +29,13 @@ uint8_t SPIx_WriteRead(uint8_t Byte)
   uint8_t receivedbyte = 0;
 
   if(HAL_SPI_TransmitReceive(&hspi1,(uint8_t*) &Byte,(uint8_t*) &receivedbyte,1,0x1000)!=HAL_OK)
-
   {
-
     Error();
-
   }
-
+  if(HAL_SPI_TransmitReceive(&hspi3,(uint8_t*) &Byte,(uint8_t*) &receivedbyte,1,0x1000)!=HAL_OK)
+  {
+    Error();
+  }
   return receivedbyte;
 
 }
@@ -118,6 +119,9 @@ void SPI_Release(void)
 
   HAL_SPI_Init(&hspi1);
 
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; //156.25 kbbs
+
+    HAL_SPI_Init(&hspi3);
 
 
   //Następnie wyślemy kilka impulsów na pin zegara SPI. Według arkusza danych potrzebujesz co najmniej 74, na wszelki wypadek wyślemy 80. Można to zrobić po prostu przepuszczając bajt przez magistralę SPI. Jest jeszcze jeden wymóg - noga selekcyjna musi zostać podniesiona

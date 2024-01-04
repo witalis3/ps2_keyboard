@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <usbd_customhid.h>
+//#include <usbd_customhid.h>
 
 //#include "stm32f0xx.h"
 #include "stm32h7xx_hal.h"
@@ -38,7 +38,7 @@ void put_key(struct keyboard_hid_t *khid, uint8_t keycode);
 void pop_key(struct keyboard_hid_t *khid, uint8_t keycode);
 void ps2_clk_callback(  struct queue_t *keyq,  uint32_t *keyq_timeout,  GPIO_TypeDef *din_port,  uint16_t din_pin);
 void handle_keys(
-  USBD_HandleTypeDef *usbd,
+  //USBD_HandleTypeDef *usbd,
   struct keyboard_hid_t *khid,
   struct queue_t *keyq,
   uint32_t keyq_timeout,

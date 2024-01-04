@@ -33,11 +33,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "fatfs.h"
-#include "i2c.h"
 #include "spi.h"
 #include "tim.h"
-#include "usart.h"
-#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -115,7 +112,7 @@ void myprintf(const char *fmt, ...)
 	  va_end(args);
 
 	  int len = strlen(buffer);
-	  HAL_UART_Transmit(&huart2, (uint8_t*)buffer, len, HAL_MAX_DELAY);
+	 // HAL_UART_Transmit(&huart2, (uint8_t*)buffer, len, HAL_MAX_DELAY);
 }
 void init()
 {
@@ -160,24 +157,22 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_I2C1_Init();
-  MX_USART2_UART_Init();
-  MX_USB_DEVICE_Init();
   MX_FATFS_Init();
   MX_SPI1_Init();
   MX_TIM2_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
   // SD SPI:
   HAL_TIM_Base_Start_IT(&htim2);
 
 
-  queue_init(&keyq);
+  //queue_init(&keyq);
   //const char message[] = "Keyboard started!\r\n";
   //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
   /* USER CODE BEGIN 2 */
   //const char message[] = "SD card demo by kiwih\r\n";
   //HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
-  myprintf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
+ // myprintf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
   // SD SPI
       HAL_TIM_Base_Start_IT(&htim2);
 
@@ -188,7 +183,8 @@ int main(void)
 
   //HAL_Delay(1000); //a short delay is important to let the SD card settle
 
-  HAL_Delay(500);
+  //HAL_Delay(500);
+/*
   f_mount(&fs, "", 0);
   f_open(&fil, "write.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
   //f_lseek(&fil, fil.fsize);
@@ -272,7 +268,7 @@ int main(void)
   //We're done, so de-mount the drive
   f_mount(NULL, "", 0);
 
-
+*/
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -280,16 +276,17 @@ int main(void)
   	//init();
 
   	// inicjalizacja OLED
+  /*
   	ssd1306_Init();
     ssd1306_Fill(Black);
     ssd1306_SetCursor(0,26);
     ssd1306_WriteString("Modulo 3 ele", Font_11x18, White);
     ssd1306_UpdateScreen();
-
+*/
 
   while (1)
   {
-	  handle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
+	  //shandle_keys(&hUsbDeviceFS, &khid, &keyq, keyq_timeout, &hi2c1);
 	#ifdef DEBUGi
 	  uint8_t bit = HAL_GPIO_ReadPin(CLK_GPIO_Port, CLK_Pin);
 	  	  if (bit == 0)
@@ -353,7 +350,7 @@ int main(void)
 					  HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
 
 			 }
-			 */
+
 			 char znak = KeyPad_WaitForKeyGetChar(timeout);
 			 if (znak != 'X')
 			 {
@@ -366,7 +363,7 @@ int main(void)
 					ssd1306_UpdateScreen();
 			 }
 
-
+*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
