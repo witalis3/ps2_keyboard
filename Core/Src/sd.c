@@ -7,7 +7,7 @@
 #include "sd.h"
 extern volatile uint16_t Timer1;
 sd_info_ptr sdinfo;
-extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi3;
 extern UART_HandleTypeDef huart2;
 //--------------------------------------------------
 extern volatile uint16_t Timer1;
@@ -77,14 +77,14 @@ uint8_t sd_ini(void) {
   uint32_t temp;
   LD_OFF;
   sdinfo.type = 0;
-	temp = hspi1.Init.BaudRatePrescaler;
-	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; //156.25 kbbs
-	HAL_SPI_Init(&hspi1);
+	temp = hspi3.Init.BaudRatePrescaler;
+	hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; //156.25 kbbs
+	HAL_SPI_Init(&hspi3);
 	SS_SD_DESELECT();
 	for(i=0;i<10;i++)
 	SPI_Release();
-	hspi1.Init.BaudRatePrescaler = temp;
-	HAL_SPI_Init(&hspi1);
+	hspi3.Init.BaudRatePrescaler = temp;
+	HAL_SPI_Init(&hspi3);
 	SS_SD_SELECT();
 	if (SD_cmd(CMD0, 0) == 1) // Enter Idle state
 		{
@@ -152,7 +152,7 @@ static void Error(void)
 uint8_t SPIx_WriteRead(uint8_t Byte)
 {
 	uint8_t receivedbyte = 0;
-	if (HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) &Byte, (uint8_t*) &receivedbyte, 1, 0x1000) != HAL_OK)
+	if (HAL_SPI_TransmitReceive(&hspi3, (uint8_t*) &Byte, (uint8_t*) &receivedbyte, 1, 0x1000) != HAL_OK)
 	{
 		Error();
 	}

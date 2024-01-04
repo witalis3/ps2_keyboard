@@ -148,8 +148,8 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
   MX_FATFS_Init();
-  MX_SPI1_Init();
   MX_TIM2_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
   //HAL_Delay(1000);
 
