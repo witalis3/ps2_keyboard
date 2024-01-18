@@ -17,16 +17,19 @@
   *
   * OLED, klawiatura, keypad
   * SD na SPI3
-  * CS PA0 biały (przy module)
-  * MOSI PB2 niebieski
-  * MISO PC11 czarny
-  * SCK PC10 żółty
+  * CS PA0 biały (przy module) -> zielony (analizator)
+  * MOSI PB2 niebieski fioletowy (analizator)
+  * MISO PC11 czarny -> niebieski (analizator)
+  * SCK PC10 żółty	-> żółty (analizator)
   *
   *
   *
   * ToDo główne
   * 	- pamiętać:
-  * 		- u nas jest hspi3 (hsp trzy) i huart2
+  * 		- u nas jest hspi3 (hsp trzy) i
+  * 		- huart2
+  * 			- PA2 TXD
+  * 			- PA3 RXD
   * 	- obsługa SD na magistarli SPI wg urok1,2,3
   * 		- obejrzeć przebiegi???
   *
