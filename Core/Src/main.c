@@ -25,13 +25,14 @@
   *
   *
   * ToDo główne
+  * na tym przerwane prace nad urok 88 part 3 -> ToDo w sd.c
+  *
   * 	- pamiętać:
   * 		- u nas jest hspi3 (hsp trzy) i
   * 		- huart2
   * 			- PA2 TXD
   * 			- PA3 RXD
   * 	- obsługa SD na magistarli SPI wg urok1,2,3
-  * 		- obejrzeć przebiegi???
   *
   * 	- obsługa dwóch kart
   * 	- identyfikacja klawiatury (model/producent) w sytemie na PC
@@ -85,6 +86,7 @@
 
 /* USER CODE BEGIN PV */
 volatile uint16_t Timer1=0;
+uint8_t sect[512];
 
 struct queue_t keyq = {0};
 struct keyboard_hid_t khid = {0};

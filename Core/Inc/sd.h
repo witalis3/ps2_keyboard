@@ -41,4 +41,6 @@ void SD_PowerOn(void);
 uint8_t sd_ini(void);
 void SPI_SendByte(uint8_t bt);
 uint8_t SPI_ReceiveByte(void);
+uint8_t SD_Write_Block (uint8_t *buff, uint32_t lba);
+uint8_t SD_Read_Block (uint8_t *buff, uint32_t lba);
 #endif /* INC_SD_H_ */
