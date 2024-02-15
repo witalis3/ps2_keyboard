@@ -24,16 +24,17 @@
   *
   *
   *
-  * ToDo główne
-  * na tym przerwane prace nad urok 88 part 3 -> ToDo w sd.c
+  * ToDo bieżące
+  * na tym przerwane prace nad urok 88 part 3 -> Продолжим наш код в main() и начнём писать
   *
+  *------------------------------------------------------
   * 	- pamiętać:
-  * 		- u nas jest hspi3 (hsp trzy) i
-  * 		- huart2
+  * 		- u nas jest hspi3 (hspi trzy) i
+  * 		- i huart2
   * 			- PA2 TXD
   * 			- PA3 RXD
-  * 	- obsługa SD na magistarli SPI wg urok1,2,3
   *
+  * ToDo na później
   * 	- obsługa dwóch kart
   * 	- identyfikacja klawiatury (model/producent) w sytemie na PC
   * 	- keypad ewentualnie na przerwaniach: są opóźnienia na klawiaturze spowodowane
@@ -87,7 +88,18 @@
 /* USER CODE BEGIN PV */
 volatile uint16_t Timer1=0;
 uint8_t sect[512];
+//char buffer1[512] ="Selection ... The..."; //bufor danych dla zapisu i odczytu
+uint8_t sect[512];
+// z urok 3:
+extern char str1[60];
+uint32_t byteswritten,bytesread;
+uint8_t result;
+extern char USER_Path[4]; /* logical drive path */
+FATFS SDFatFs;
+FATFS *fs;
+FIL MyFile;
 
+//---------------------
 struct queue_t keyq = {0};
 struct keyboard_hid_t khid = {0};
 uint32_t keyq_timeout = 0;
@@ -125,7 +137,7 @@ void init()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint16_t i;
 
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten; /* File write/read counts */
@@ -164,9 +176,16 @@ int main(void)
   //HAL_Delay(1000);
 
   HAL_TIM_Base_Start_IT(&htim2);
-  SD_PowerOn();
-  sd_ini();
+  //SD_PowerOn();
+  //sd_ini();
 
+  // zapis i odczyt z pominięciem systemu plików:
+  //SD_Write_Block((uint8_t*)buffer1,0x0400); //zapisujemy blok w bufor na konkretny adres
+  //SD_Read_Block(sect,0x0400); //wczytujemy blok z bufora (karty)
+  //for(i=0;i<512;i++) HAL_UART_Transmit(&huart2, sect+i, 1, 0x1000);
+  //HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n",2,0x1000);
+
+  disk_initialize(SDFatFs.drv);
   queue_init(&keyq);
   const char message[] = "Keyboard started!\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);

@@ -35,11 +35,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include "ff_gen_drv.h"
+#include "sd.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+extern UART_HandleTypeDef huart2;
+extern char str1[60];
+extern sd_info_ptr sdinfo;
+
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
 
@@ -81,7 +86,10 @@ DSTATUS USER_initialize (
 )
 {
   /* USER CODE BEGIN INIT */
-    Stat = STA_NOINIT;
+    //Stat = STA_NOINIT;
+    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_initialize\r\n",17,0x1000);
+    SD_PowerOn();
+    if(sd_ini()==0) {Stat &= ~STA_NOINIT;} //kasowanie STA_NOINIT
     return Stat;
   /* USER CODE END INIT */
 }
@@ -91,12 +99,12 @@ DSTATUS USER_initialize (
   * @param  pdrv: Physical drive number (0..)
   * @retval DSTATUS: Operation status
   */
-DSTATUS USER_status (
-	BYTE pdrv       /* Physical drive number to identify the drive */
-)
+DSTATUS USER_status (BYTE pdrv /* Physical drive number to identify the drive */)
 {
   /* USER CODE BEGIN STATUS */
     Stat = STA_NOINIT;
+    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_statusrn",13,0x1000);
+
     return Stat;
   /* USER CODE END STATUS */
 }
@@ -117,6 +125,9 @@ DRESULT USER_read (
 )
 {
   /* USER CODE BEGIN READ */
+	HAL_UART_Transmit(&huart2,(uint8_t*)"USER_readrn",11,0x1000);
+	sprintf(str1,"sector: %lu; count: %drn",sector, count);
+	HAL_UART_Transmit(&huart2,(uint8_t*)str1,strlen(str1),0x1000);
     return RES_OK;
   /* USER CODE END READ */
 }
@@ -139,6 +150,9 @@ DRESULT USER_write (
 {
   /* USER CODE BEGIN WRITE */
   /* USER CODE HERE */
+	HAL_UART_Transmit(&huart2,(uint8_t*)"USER_writern",12,0x1000);
+	sprintf(str1,"sector: %lurn",sector);
+	HAL_UART_Transmit(&huart2,(uint8_t*)str1,strlen(str1),0x1000);
     return RES_OK;
   /* USER CODE END WRITE */
 }
@@ -160,6 +174,9 @@ DRESULT USER_ioctl (
 {
   /* USER CODE BEGIN IOCTL */
     DRESULT res = RES_ERROR;
+    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_ioctlrn",12,0x1000);
+    sprintf(str1,"cmd: %drn",cmd);
+    HAL_UART_Transmit(&huart2,(uint8_t*)str1,strlen(str1),0x1000);
     return res;
   /* USER CODE END IOCTL */
 }

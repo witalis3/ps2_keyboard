@@ -212,6 +212,7 @@ uint8_t SD_Write_Block (uint8_t *buff, uint32_t lba)
 	for (cnt = 0; cnt < 512; cnt++)
 		SPI_SendByte(buff[cnt]); //data
 	SPI_Release(); //omit checksum
+	// ToDo sprawdzić sumę kontrolną
 	SPI_Release();
 	result = SPI_ReceiveByte();
 	if ((result & 0x05) != 0x05)
@@ -225,6 +226,7 @@ uint8_t SD_Write_Block (uint8_t *buff, uint32_t lba)
 		return 6;
 	return 0;
 }
+
 // 20240127:
 // ToDo na tym przerwane prace nad urok 88 part 3
 //-----------------------------------------------
