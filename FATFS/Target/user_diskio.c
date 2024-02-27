@@ -102,9 +102,9 @@ DSTATUS USER_initialize (
 DSTATUS USER_status (BYTE pdrv /* Physical drive number to identify the drive */)
 {
   /* USER CODE BEGIN STATUS */
-    Stat = STA_NOINIT;
-    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_statusrn",13,0x1000);
-
+    //Stat = STA_NOINIT;
+    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_status\r\n",13,0x1000);
+    if (pdrv) return STA_NOINIT;
     return Stat;
   /* USER CODE END STATUS */
 }
@@ -125,10 +125,23 @@ DRESULT USER_read (
 )
 {
   /* USER CODE BEGIN READ */
-	HAL_UART_Transmit(&huart2,(uint8_t*)"USER_readrn",11,0x1000);
-	sprintf(str1,"sector: %lu; count: %drn",sector, count);
+	HAL_UART_Transmit(&huart2,(uint8_t*)"USER_read\r\n",11,0x1000);
+	sprintf(str1,"sector: %lu; count: %d\r\n",sector, count);
 	HAL_UART_Transmit(&huart2,(uint8_t*)str1,strlen(str1),0x1000);
-    return RES_OK;
+	if (pdrv || !count) return RES_PARERR;
+	if (Stat & STA_NOINIT) return RES_NOTRDY;
+	if (!(sdinfo.type & 4)) sector *= 512; /* Convert to byte address if needed */
+	if (count == 1) /* Single block read */
+	{
+	  SD_Read_Block(buff,sector); //Считаем блок в буфер
+	  count = 0;
+	}
+	else /* Multiple block read */
+	{
+
+	}
+	SPI_Release();
+	return count ? RES_ERROR : RES_OK;
   /* USER CODE END READ */
 }
 
@@ -150,8 +163,8 @@ DRESULT USER_write (
 {
   /* USER CODE BEGIN WRITE */
   /* USER CODE HERE */
-	HAL_UART_Transmit(&huart2,(uint8_t*)"USER_writern",12,0x1000);
-	sprintf(str1,"sector: %lurn",sector);
+	HAL_UART_Transmit(&huart2,(uint8_t*)"USER_write\r\n",12,0x1000);
+	sprintf(str1,"sector: %lu\r\n",sector);
 	HAL_UART_Transmit(&huart2,(uint8_t*)str1,strlen(str1),0x1000);
     return RES_OK;
   /* USER CODE END WRITE */
@@ -173,10 +186,23 @@ DRESULT USER_ioctl (
 )
 {
   /* USER CODE BEGIN IOCTL */
-    DRESULT res = RES_ERROR;
-    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_ioctlrn",12,0x1000);
-    sprintf(str1,"cmd: %drn",cmd);
+    DRESULT res;
+    HAL_UART_Transmit(&huart2,(uint8_t*)"USER_ioctl\r\n",12,0x1000);
+    sprintf(str1,"cmd: %d\r\n",cmd);
     HAL_UART_Transmit(&huart2,(uint8_t*)str1,strlen(str1),0x1000);
+    if (pdrv) return RES_PARERR;
+    if (Stat & STA_NOINIT) return RES_NOTRDY;
+    res = RES_ERROR;
+    switch (cmd)
+    {
+      case GET_SECTOR_SIZE : /* Get sectors on the disk (WORD) */
+        *(WORD*)buff = 512;
+        res = RES_OK;
+        break;
+      default:
+        res = RES_PARERR;
+    }
+   SPI_Release();
     return res;
   /* USER CODE END IOCTL */
 }

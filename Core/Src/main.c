@@ -25,7 +25,10 @@
   *
   *
   * ToDo bieżące
-  * na tym przerwane prace nad urok 88 part 3 -> Продолжим наш код в main() и начнём писать
+  * na tym przerwane prace nad urok 88 part 3 -> 9koniec
+  * 	- przetestować plik większy niż 512 bajtów (parę kilo)
+  * 		- co z obsługą dużych plików -> if else {} w usewrdiskio.c "Multiple block read"
+  * 	- analiza na analizatorze braku inicjalizacji
   *
   *------------------------------------------------------
   * 	- pamiętać:
@@ -94,10 +97,12 @@ uint8_t sect[512];
 extern char str1[60];
 uint32_t byteswritten,bytesread;
 uint8_t result;
-extern char USER_Path[4]; /* logical drive path */
+extern char USERPath[4]; /* logical drive path */
 FATFS SDFatFs;
 FATFS *fs;
 FIL MyFile;
+FRESULT fr;
+FILINFO fno;
 
 //---------------------
 struct queue_t keyq = {0};
@@ -121,6 +126,39 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+FRESULT ReadLongFile(void)
+
+{
+  uint16_t i=0, i1=0;
+  uint32_t ind=0;
+  uint32_t f_size = fno.fsize;
+	sprintf(str1, "fsize: %lu\r\n", (unsigned long) f_size);
+	HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
+	ind = 0;
+	do
+	{
+		if (f_size < 512)
+		{
+			i1 = f_size;
+		}
+		else
+		{
+			i1 = 512;
+		}
+		f_size -= i1;
+		f_lseek(&MyFile, ind);
+		f_read(&MyFile, sect, i1, (UINT*) &bytesread);
+		for (i = 0; i < bytesread; i++)
+		{
+			HAL_UART_Transmit(&huart2, sect + i, 1, 0x1000);
+		}
+		ind += i1;
+	}
+	while (f_size > 0);
+	HAL_UART_Transmit(&huart2, (uint8_t*) "\r\n", 2, 0x1000);
+	return FR_OK;
+}
+
 void init()
 {
 	//ssd1306_TestAll();
@@ -186,6 +224,27 @@ int main(void)
   //HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n",2,0x1000);
 
   disk_initialize(SDFatFs.drv);
+  //read
+
+	if (f_mount(&SDFatFs, (TCHAR const*) USERPath, 0) != FR_OK)
+	{
+		Error_Handler();
+	}
+	else
+	{
+		fr = f_stat("123.txt", &fno);
+		if (f_open(&MyFile, "123.txt", FA_READ) != FR_OK)
+		{
+			Error_Handler();
+		}
+		else
+		{
+			ReadLongFile();
+			f_close(&MyFile);
+		}
+	}
+
+
   queue_init(&keyq);
   const char message[] = "Keyboard started!\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
