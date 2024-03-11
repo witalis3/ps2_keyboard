@@ -16,6 +16,7 @@
   ******************************************************************************
   *
   * OLED, klawiatura, keypad
+  * --------------------------
   * SD na SPI3
   * CS PA0 biały (przy module) -> zielony (analizator)
   * MOSI PB2 niebieski fioletowy (analizator)
@@ -25,10 +26,11 @@
   *
   *
   * ToDo bieżące
-  * na tym przerwane prace nad urok 88 part 3 -> 9koniec
-  * 	- przetestować plik większy niż 512 bajtów (parę kilo)
-  * 		- co z obsługą dużych plików -> if else {} w usewrdiskio.c "Multiple block read"
-  * 	- analiza na analizatorze braku inicjalizacji
+  * na tym przerwane prace nad urok 88 part 4 -> test open_dir o close + dołożyć obsługę błędów
+  * 	- nowy branch z przykładami wykorzystania biblioteki Chana ver. 0.15 (Chan_FatFS_015) -> implementacja
+  * 	- analiza na analizatorze braku inicjalizacji -> na potem
+  * 		- CLK i MOSI nie startują po inicjalizacji; może zmiana zegara ma wpływ?
+  * 			- niby po delay pojawił się dodakowy dołek/impuls w CS po ini
   *
   *------------------------------------------------------
   * 	- pamiętać:
@@ -90,7 +92,7 @@
 
 /* USER CODE BEGIN PV */
 volatile uint16_t Timer1=0;
-uint8_t sect[512];
+//uint8_t sect[512];
 //char buffer1[512] ="Selection ... The..."; //bufor danych dla zapisu i odczytu
 uint8_t sect[512];
 // z urok 3:
@@ -176,10 +178,16 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint16_t i;
-
 	FRESULT res; /* FatFs function common result code */
-	uint32_t byteswritten; /* File write/read counts */
 	uint8_t wtext[] = "STM32 FATFS works jako tako"; /* File write buffer */
+	FILINFO fileInfo;
+	char *fn;
+	DIR dir;
+	DWORD fre_clust, fre_sect, tot_sect;
+
+
+
+	uint32_t byteswritten; /* File write/read counts */
 	//uint8_t rtext[_MAX_SS];/* File read buffer */
 
 	KeyPad_Init();
@@ -224,9 +232,9 @@ int main(void)
   //HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n",2,0x1000);
 
   disk_initialize(SDFatFs.drv);
+  /*
   //read
-
-	if (f_mount(&SDFatFs, (TCHAR const*) USERPath, 0) != FR_OK)
+  	if (f_mount(&SDFatFs, (TCHAR const*) USERPath, 0) != FR_OK)
 	{
 		Error_Handler();
 	}
@@ -243,6 +251,50 @@ int main(void)
 			f_close(&MyFile);
 		}
 	}
+*/
+/*
+  //write
+
+  if(f_mount(&SDFatFs,(TCHAR const*)USERPath,0)!=FR_OK)
+  {
+    Error_Handler();
+  }
+  else
+  {
+    if(f_open(&MyFile,"mywrite.txt",FA_CREATE_ALWAYS|FA_WRITE)!=FR_OK)
+    {
+      Error_Handler();
+    }
+
+    else
+    {
+      res=f_write(&MyFile,wtext,sizeof(wtext),(void*)&byteswritten);
+      if((byteswritten==0)||(res!=FR_OK))
+      {
+        Error_Handler();
+      }
+      f_close(&MyFile);
+    }
+  }
+*/
+//read dir
+  if(f_mount(&SDFatFs,(TCHAR const*)USERPath,0)!=FR_OK)
+  {
+    Error_Handler();
+  }
+  else
+  {
+	//fr = f_stat("123.txt", &fno);
+    //fileInfo.fname = (char*)sect;
+    //fileInfo.fsize = sizeof(sect);
+    result = f_opendir(&dir, "/");
+    if (result == FR_OK)
+    {
+      f_closedir(&dir);
+    }
+  }
+  FATFS_UnLinkDriver(USERPath);
+
 
 
   queue_init(&keyq);
@@ -342,7 +394,6 @@ int main(void)
 					ssd1306_WriteString(str1, Font_11x18, White);
 					ssd1306_UpdateScreen();
 			 }
-
 
     /* USER CODE END WHILE */
 
