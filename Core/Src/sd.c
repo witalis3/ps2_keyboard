@@ -94,8 +94,8 @@ uint8_t sd_ini(void) {
 				{
 			for (i = 0; i < 4; i++)
 				ocr[i] = SPI_ReceiveByte();
-			//sprintf(str1, "OCR: 0x%02X 0x%02X 0x%02X 0x%02X\r\n", ocr[0], ocr[1], ocr[2], ocr[3]);
-			//HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
+			sprintf(str1, "OCR: 0x%02X 0x%02X 0x%02X 0x%02X\r\n", ocr[0], ocr[1], ocr[2], ocr[3]);
+			HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
 			if (ocr[2] == 0x01 && ocr[3] == 0xAA) // The card can work at vdd range of 2.7-3.6V
 					{
 				for (tmr = 12000; tmr && SD_cmd(ACMD41, 1UL << 30); tmr--)
@@ -103,8 +103,8 @@ uint8_t sd_ini(void) {
 				if (tmr && SD_cmd(CMD58, 0) == 0) { // Check CCS bit in the OCR
 					for (i = 0; i < 4; i++)
 						ocr[i] = SPI_ReceiveByte();
-					//sprintf(str1, "OCR: 0x%02X 0x%02X 0x%02X 0x%02X\r\n",ocr[0], ocr[1], ocr[2], ocr[3]);
-					//HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
+					sprintf(str1, "OCR: 0x%02X 0x%02X 0x%02X 0x%02X\r\n",ocr[0], ocr[1], ocr[2], ocr[3]);
+					HAL_UART_Transmit(&huart2, (uint8_t*) str1, strlen(str1), 0x1000);
 					sdinfo.type = (ocr[0] & 0x40) ? CT_SD2 | CT_BLOCK : CT_SD2; // SDv2 (HC or SC)
 				}
 			}

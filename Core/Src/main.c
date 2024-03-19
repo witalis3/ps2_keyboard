@@ -26,7 +26,10 @@
   *
   *
   * ToDo bieżące
-  * na tym przerwane prace nad urok 88 part 4 -> test open_dir o close + dołożyć obsługę błędów
+  *
+  * wyłuskanie nazwy pliku i katalogu z dwóch struktur: FILINFO I FATFS
+  *
+  *
   * 	- nowy branch z przykładami wykorzystania biblioteki Chana ver. 0.15 (Chan_FatFS_015) -> implementacja
   * 	- analiza na analizatorze braku inicjalizacji -> na potem
   * 		- CLK i MOSI nie startują po inicjalizacji; może zmiana zegara ma wpływ?
@@ -34,10 +37,11 @@
   *
   *------------------------------------------------------
   * 	- pamiętać:
-  * 		- u nas jest hspi3 (hspi trzy) i
-  * 		- i huart2
-  * 			- PA2 TXD
-  * 			- PA3 RXD
+  * 		- u nas jest:
+  * 			- hspi3 (hspi trzy)
+  * 			- huart2
+  * 				- PA2 TXD
+  * 				- PA3 RXD
   *
   * ToDo na później
   * 	- obsługa dwóch kart
@@ -185,8 +189,6 @@ int main(void)
 	DIR dir;
 	DWORD fre_clust, fre_sect, tot_sect;
 
-
-
 	uint32_t byteswritten; /* File write/read counts */
 	//uint8_t rtext[_MAX_SS];/* File read buffer */
 
@@ -284,12 +286,34 @@ int main(void)
   }
   else
   {
-	//fr = f_stat("123.txt", &fno);
-    //fileInfo.fname = (char*)sect;
-    //fileInfo.fsize = sizeof(sect);
+	SDFatFs.lfnbuf = (char*)sect;
+    fileInfo.fsize = sizeof(sect);
     result = f_opendir(&dir, "/");
     if (result == FR_OK)
     {
+    	while(1)
+    	  {
+    	    result = f_readdir(&dir, &fileInfo);
+    	    if (result==FR_OK && fileInfo.fname[0])
+    	    {
+    	    	//fn = fileInfo.lfname; ???
+    	    	fn = SDFatFs.lfnbuf;
+    	    	  if(strlen(fn))
+    	    	  {
+    	    		  HAL_UART_Transmit(&huart2,(uint8_t*) fn, strlen(fn),0x1000);
+    	    	  }
+    	    	  else
+    	    		  {
+    	    		  	  HAL_UART_Transmit(&huart2,(uint8_t*)fileInfo.fname, strlen((char*)fileInfo.fname),0x1000);
+    	    		  }
+    	    	  if(fileInfo.fattrib & AM_DIR)
+    	    	  {
+    	    	    HAL_UART_Transmit(&huart2,(uint8_t*)" [DIR]",7,0x1000);
+    	    	  }
+    	    }
+    	    else break;
+    	    HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n",2,0x1000);
+    	  }
       f_closedir(&dir);
     }
   }
